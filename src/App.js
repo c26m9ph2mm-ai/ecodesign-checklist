@@ -9,10 +9,13 @@ import {
 import "./App.css";
 
 const sectionMeta = [
-  { key: "designBrief", title: "1. Design Brief", subtitle: "Define the assignment: what is being designed, for whom, and under what constraints.", color: "#000000", fields: designBriefFields },
-  { key: "needAnalysis", title: "2. Need Analysis", subtitle: "Identify and prioritise the needs the product must satisfy.", color: "#000000", fields: needAnalysisFields },
-  { key: "functionDefinition", title: "3. Function Definition", subtitle: "Translate needs into the functions the product must perform.", color: "#000000", fields: functionDefinitionFields },
+  { key: "designBrief", title: "1. Design Brief", subtitle: "Define the assignment: what is being designed, for whom, and under what constraints.", color: "#D97706", tint: "#FFF7E6", fields: designBriefFields },
+  { key: "needAnalysis", title: "2. Need Analysis", subtitle: "Identify and prioritise the needs the product must satisfy.", color: "#7C3AED", tint: "#F5F0FF", fields: needAnalysisFields },
+  { key: "functionDefinition", title: "3. Function Definition", subtitle: "Translate needs into the functions the product must perform.", color: "#0891B2", tint: "#E6F7FB", fields: functionDefinitionFields },
 ];
+
+const NEW_CONCEPT_COLOR = "#3EAB3F";
+const NEW_CONCEPT_TINT = "#F1F8F1";
 
 function App() {
   const [checkedItems, setCheckedItems] = useState({});
@@ -160,11 +163,11 @@ function App() {
     const filledCount = section.fields.filter((f) => (sectionData[f.id] || "").trim()).length;
     const pct = Math.round((filledCount / section.fields.length) * 100);
     return (
-      <div key={section.key} className="strategy-card">
+      <div key={section.key} className="strategy-card" style={{ borderColor: section.color }}>
         <div
           className="strategy-header"
           onClick={() => toggleSection(section.key)}
-          style={{ borderLeftColor: section.color }}
+          style={{ borderLeftColor: section.color, background: section.tint }}
         >
           <div className="strategy-title-row">
             <span className="strategy-icon" style={{ backgroundColor: section.color }}>
@@ -220,15 +223,15 @@ function App() {
 
   const renderNewConceptCard = () => {
     const isExpanded = expandedSections.has("newConcept");
-    const color = "#2E7D32";
+    const color = NEW_CONCEPT_COLOR;
     const filledCount = newConceptFields.filter((f) => (conceptData[f.id] || "").trim()).length;
     const pct = Math.round((filledCount / newConceptFields.length) * 100);
     return (
-      <div className="strategy-card concept-card">
+      <div className="strategy-card concept-card" style={{ borderColor: color }}>
         <div
           className="strategy-header"
           onClick={() => toggleSection("newConcept")}
-          style={{ borderLeftColor: color }}
+          style={{ borderLeftColor: color, background: NEW_CONCEPT_TINT }}
         >
           <div className="strategy-title-row">
             <span className="strategy-icon" style={{ backgroundColor: color }}>
@@ -354,7 +357,8 @@ function App() {
       <div className="strategies">
         {sectionMeta.map((s) => renderSectionCard(s))}
 
-        <div className="section-divider">
+        <div className="section-divider" style={{ borderBottomColor: "#3EAB3F" }}>
+          <span className="section-divider-mark" style={{ background: "#3EAB3F" }} />
           <span className="section-divider-label">4. EcoDesign Strategies (Brezet, 1997)</span>
         </div>
 
@@ -450,7 +454,8 @@ function App() {
           );
         })}
 
-        <div className="section-divider">
+        <div className="section-divider" style={{ borderBottomColor: NEW_CONCEPT_COLOR }}>
+          <span className="section-divider-mark" style={{ background: NEW_CONCEPT_COLOR }} />
           <span className="section-divider-label">5. New Concept</span>
         </div>
 

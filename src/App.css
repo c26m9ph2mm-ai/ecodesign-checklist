@@ -273,7 +273,7 @@ body {
 
 .strategy-card {
   background: var(--card-bg);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
   transition: box-shadow 0.15s;
@@ -291,7 +291,7 @@ body {
 }
 
 .strategy-header:hover {
-  background: var(--bg-alt);
+  filter: brightness(0.97);
 }
 
 .strategy-title-row {
@@ -552,11 +552,10 @@ body {
   gap: 10px;
 }
 
-.section-divider::before {
-  content: "";
+.section-divider-mark {
   display: inline-block;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   background: var(--green-primary);
 }
 
@@ -569,7 +568,7 @@ body {
 }
 
 .concept-card {
-  border: 2px solid var(--black);
+  border: 2px solid var(--green-primary);
   background: var(--card-bg);
 }
 

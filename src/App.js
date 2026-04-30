@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import checklistData from "./checklistData";
 import {
   designBriefFields,
@@ -17,19 +17,63 @@ const sectionMeta = [
 const NEW_CONCEPT_COLOR = "#3EAB3F";
 const NEW_CONCEPT_TINT = "#F1F8F1";
 
+const STORAGE_KEY = "ssi_ecodesign_checklist_v1";
+const SCHEMA_VERSION = 1;
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || parsed.version !== SCHEMA_VERSION) return null;
+    return parsed;
+  } catch (err) {
+    return null;
+  }
+}
+
 function App() {
-  const [checkedItems, setCheckedItems] = useState({});
-  const [notes, setNotes] = useState({});
+  const initial = useRef(loadFromStorage()).current;
+
+  const [checkedItems, setCheckedItems] = useState(() => initial?.checkedItems || {});
+  const [notes, setNotes] = useState(() => initial?.notes || {});
   const [expandedStrategies, setExpandedStrategies] = useState(
     () => new Set(checklistData.map((s) => s.id))
   );
-  const [projectName, setProjectName] = useState("");
-  const [teamMember, setTeamMember] = useState("");
-  const [sectionData, setSectionData] = useState({});
-  const [conceptData, setConceptData] = useState({});
+  const [projectName, setProjectName] = useState(() => initial?.projectName || "");
+  const [teamMember, setTeamMember] = useState(() => initial?.teamMember || "");
+  const [sectionData, setSectionData] = useState(() => initial?.sectionData || {});
+  const [conceptData, setConceptData] = useState(() => initial?.conceptData || {});
   const [expandedSections, setExpandedSections] = useState(
     () => new Set(["designBrief", "needAnalysis", "functionDefinition", "newConcept"])
   );
+  const [savedAt, setSavedAt] = useState(() => initial?.savedAt || null);
+  const [importMessage, setImportMessage] = useState("");
+  const fileInputRef = useRef(null);
+  const isFirstRunRef = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRunRef.current) {
+      isFirstRunRef.current = false;
+      return;
+    }
+    const payload = {
+      version: SCHEMA_VERSION,
+      savedAt: new Date().toISOString(),
+      projectName,
+      teamMember,
+      checkedItems,
+      notes,
+      sectionData,
+      conceptData,
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      setSavedAt(payload.savedAt);
+    } catch (err) {
+      console.warn("Could not auto-save", err);
+    }
+  }, [projectName, teamMember, checkedItems, notes, sectionData, conceptData]);
 
   const updateSectionField = useCallback((fieldId, value) => {
     setSectionData((prev) => ({ ...prev, [fieldId]: value }));
@@ -155,7 +199,85 @@ function App() {
       setNotes({});
       setSectionData({});
       setConceptData({});
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (err) {
+        // ignore
+      }
+      setSavedAt(null);
     }
+  };
+
+  const saveToFile = () => {
+    const payload = {
+      version: SCHEMA_VERSION,
+      exportedAt: new Date().toISOString(),
+      projectName,
+      teamMember,
+      checkedItems,
+      notes,
+      sectionData,
+      conceptData,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const safeName = (projectName || "ecodesign").replace(/[^a-z0-9-_]+/gi, "_");
+    a.href = url;
+    a.download = `ecodesign-${safeName}-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const triggerLoadFromFile = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (!parsed || parsed.version !== SCHEMA_VERSION) {
+          throw new Error("Unsupported or missing version");
+        }
+        if (
+          !window.confirm(
+            "Load this file? Current data will be replaced (auto-saved data may also be overwritten)."
+          )
+        ) {
+          return;
+        }
+        setProjectName(parsed.projectName || "");
+        setTeamMember(parsed.teamMember || "");
+        setCheckedItems(parsed.checkedItems || {});
+        setNotes(parsed.notes || {});
+        setSectionData(parsed.sectionData || {});
+        setConceptData(parsed.conceptData || {});
+        setImportMessage(`Loaded ${file.name}`);
+        setTimeout(() => setImportMessage(""), 4000);
+      } catch (err) {
+        setImportMessage(`Could not load: ${err.message}`);
+        setTimeout(() => setImportMessage(""), 6000);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const formatSavedAt = (iso) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    if (sameDay) {
+      return `Saved ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    }
+    return `Saved ${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   };
 
   const renderSectionCard = (section) => {
@@ -334,9 +456,30 @@ function App() {
         <div className="project-actions">
           <button className="btn btn-outline" onClick={expandAll}>Expand All</button>
           <button className="btn btn-outline" onClick={collapseAll}>Collapse All</button>
+          <button className="btn btn-outline" onClick={saveToFile} title="Download a .json snapshot to your computer">Save File</button>
+          <button className="btn btn-outline" onClick={triggerLoadFromFile} title="Load a previously saved .json snapshot">Load File</button>
           <button className="btn btn-primary" onClick={exportReport}>Export Report</button>
           <button className="btn btn-danger" onClick={resetAll}>Reset</button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            style={{ display: "none" }}
+            onChange={handleFileSelected}
+          />
         </div>
+      </div>
+
+      <div className="save-status">
+        <span className="save-dot" />
+        <span className="save-text">
+          {savedAt ? formatSavedAt(savedAt) : "Auto-saving to this browser"}
+          <span className="save-divider"> &middot; </span>
+          <span className="save-hint">
+            Your work is auto-saved to this browser. Use <strong>Save File</strong> to download a snapshot you can share or back up.
+          </span>
+        </span>
+        {importMessage && <span className="save-import">{importMessage}</span>}
       </div>
 
       <div className="progress-overview">

@@ -220,6 +220,66 @@ body {
   color: white;
 }
 
+/* Save status */
+.save-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background: #f7f8f5;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green-primary);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  flex-wrap: wrap;
+}
+
+.save-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green-primary);
+  flex-shrink: 0;
+  margin-top: 5px;
+  box-shadow: 0 0 0 0 rgba(62, 171, 63, 0.5);
+  animation: save-pulse 2.4s ease-out infinite;
+}
+
+@keyframes save-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(62, 171, 63, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(62, 171, 63, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(62, 171, 63, 0); }
+}
+
+.save-text strong {
+  color: var(--black);
+  font-weight: 700;
+}
+
+.save-divider {
+  color: var(--border);
+}
+
+.save-hint {
+  font-weight: 500;
+}
+
+.save-import {
+  display: inline-block;
+  margin-left: auto;
+  padding: 3px 10px;
+  background: var(--green-primary);
+  color: white;
+  font-weight: 700;
+  border-radius: var(--radius);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 /* Progress overview */
 .progress-overview {
   background: var(--black);

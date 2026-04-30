@@ -1,6 +1,18 @@
 import React, { useState, useCallback, useMemo } from "react";
 import checklistData from "./checklistData";
+import {
+  designBriefFields,
+  needAnalysisFields,
+  functionDefinitionFields,
+  newConceptFields,
+} from "./sectionsData";
 import "./App.css";
+
+const sectionMeta = [
+  { key: "designBrief", title: "1. Design Brief", subtitle: "Define the assignment: what is being designed, for whom, and under what constraints.", color: "#5D4037", fields: designBriefFields },
+  { key: "needAnalysis", title: "2. Need Analysis", subtitle: "Identify and prioritise the needs the product must satisfy.", color: "#00695C", fields: needAnalysisFields },
+  { key: "functionDefinition", title: "3. Function Definition", subtitle: "Translate needs into the functions the product must perform.", color: "#1565C0", fields: functionDefinitionFields },
+];
 
 function App() {
   const [checkedItems, setCheckedItems] = useState({});
@@ -10,6 +22,28 @@ function App() {
   );
   const [projectName, setProjectName] = useState("");
   const [teamMember, setTeamMember] = useState("");
+  const [sectionData, setSectionData] = useState({});
+  const [conceptData, setConceptData] = useState({});
+  const [expandedSections, setExpandedSections] = useState(
+    () => new Set(["designBrief", "needAnalysis", "functionDefinition", "newConcept"])
+  );
+
+  const updateSectionField = useCallback((fieldId, value) => {
+    setSectionData((prev) => ({ ...prev, [fieldId]: value }));
+  }, []);
+
+  const updateConceptField = useCallback((fieldId, value) => {
+    setConceptData((prev) => ({ ...prev, [fieldId]: value }));
+  }, []);
+
+  const toggleSection = useCallback((key) => {
+    setExpandedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
 
   const toggleCheck = useCallback((itemId) => {
     setCheckedItems((prev) => ({ ...prev, [itemId]: !prev[itemId] }));
@@ -48,8 +82,14 @@ function App() {
 
   const overallPercent = totalItems > 0 ? Math.round((totalChecked / totalItems) * 100) : 0;
 
-  const expandAll = () => setExpandedStrategies(new Set(checklistData.map((s) => s.id)));
-  const collapseAll = () => setExpandedStrategies(new Set());
+  const expandAll = () => {
+    setExpandedStrategies(new Set(checklistData.map((s) => s.id)));
+    setExpandedSections(new Set(["designBrief", "needAnalysis", "functionDefinition", "newConcept"]));
+  };
+  const collapseAll = () => {
+    setExpandedStrategies(new Set());
+    setExpandedSections(new Set());
+  };
 
   const exportReport = () => {
     const now = new Date().toLocaleString();
@@ -60,6 +100,20 @@ function App() {
     report += `Assessed by: ${teamMember || "(not specified)"}\n`;
     report += `Date: ${now}\n`;
     report += `Overall Progress: ${totalChecked}/${totalItems} (${overallPercent}%)\n\n`;
+
+    sectionMeta.forEach((section) => {
+      report += `\n${"=".repeat(50)}\n`;
+      report += `${section.title}\n`;
+      report += `${"=".repeat(50)}\n`;
+      section.fields.forEach((f) => {
+        const val = sectionData[f.id] || "(not specified)";
+        report += `\n${f.label}:\n  ${val.split("\n").join("\n  ")}\n`;
+      });
+    });
+
+    report += `\n\n${"=".repeat(50)}\n`;
+    report += `4. ECODESIGN STRATEGIES (Brezet 1997)\n`;
+    report += `${"=".repeat(50)}\n`;
 
     checklistData.forEach((strategy) => {
       const prog = getStrategyProgress(strategy);
@@ -75,6 +129,14 @@ function App() {
       });
     });
 
+    report += `\n\n${"=".repeat(50)}\n`;
+    report += `5. NEW CONCEPT — FULL DESCRIPTION\n`;
+    report += `${"=".repeat(50)}\n`;
+    newConceptFields.forEach((f) => {
+      const val = conceptData[f.id] || "(not specified)";
+      report += `\n${f.label}:\n  ${val.split("\n").join("\n  ")}\n`;
+    });
+
     const blob = new Blob([report], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -85,10 +147,139 @@ function App() {
   };
 
   const resetAll = () => {
-    if (window.confirm("Reset all checklist items and notes? This cannot be undone.")) {
+    if (window.confirm("Reset all sections, checklist items, and notes? This cannot be undone.")) {
       setCheckedItems({});
       setNotes({});
+      setSectionData({});
+      setConceptData({});
     }
+  };
+
+  const renderSectionCard = (section) => {
+    const isExpanded = expandedSections.has(section.key);
+    const filledCount = section.fields.filter((f) => (sectionData[f.id] || "").trim()).length;
+    const pct = Math.round((filledCount / section.fields.length) * 100);
+    return (
+      <div key={section.key} className="strategy-card">
+        <div
+          className="strategy-header"
+          onClick={() => toggleSection(section.key)}
+          style={{ borderLeftColor: section.color }}
+        >
+          <div className="strategy-title-row">
+            <span className="strategy-icon" style={{ backgroundColor: section.color }}>
+              &#9998;
+            </span>
+            <div className="strategy-info">
+              <h2>{section.title}</h2>
+              <p>{section.subtitle}</p>
+            </div>
+            <div className="strategy-meta">
+              <div className="strategy-badge" style={{ backgroundColor: section.color }}>
+                {filledCount}/{section.fields.length}
+              </div>
+              <span className="chevron">{isExpanded ? "▾" : "▸"}</span>
+            </div>
+          </div>
+          <div className="strategy-progress-track">
+            <div
+              className="strategy-progress-fill"
+              style={{ width: `${pct}%`, backgroundColor: section.color }}
+            />
+          </div>
+        </div>
+        {isExpanded && (
+          <div className="section-fields">
+            {section.fields.map((field) => (
+              <div key={field.id} className="section-field">
+                <label className="section-field-label">{field.label}</label>
+                {field.multiline ? (
+                  <textarea
+                    className="section-textarea"
+                    rows={3}
+                    placeholder={field.placeholder}
+                    value={sectionData[field.id] || ""}
+                    onChange={(e) => updateSectionField(field.id, e.target.value)}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    className="section-input"
+                    placeholder={field.placeholder}
+                    value={sectionData[field.id] || ""}
+                    onChange={(e) => updateSectionField(field.id, e.target.value)}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderNewConceptCard = () => {
+    const isExpanded = expandedSections.has("newConcept");
+    const color = "#2E7D32";
+    const filledCount = newConceptFields.filter((f) => (conceptData[f.id] || "").trim()).length;
+    const pct = Math.round((filledCount / newConceptFields.length) * 100);
+    return (
+      <div className="strategy-card concept-card">
+        <div
+          className="strategy-header"
+          onClick={() => toggleSection("newConcept")}
+          style={{ borderLeftColor: color }}
+        >
+          <div className="strategy-title-row">
+            <span className="strategy-icon" style={{ backgroundColor: color }}>
+              &#10026;
+            </span>
+            <div className="strategy-info">
+              <h2>5. New Concept &mdash; Full Description</h2>
+              <p>Synthesise findings into the proposed eco-design concept.</p>
+            </div>
+            <div className="strategy-meta">
+              <div className="strategy-badge" style={{ backgroundColor: color }}>
+                {filledCount}/{newConceptFields.length}
+              </div>
+              <span className="chevron">{isExpanded ? "▾" : "▸"}</span>
+            </div>
+          </div>
+          <div className="strategy-progress-track">
+            <div
+              className="strategy-progress-fill"
+              style={{ width: `${pct}%`, backgroundColor: color }}
+            />
+          </div>
+        </div>
+        {isExpanded && (
+          <div className="section-fields">
+            {newConceptFields.map((field) => (
+              <div key={field.id} className="section-field">
+                <label className="section-field-label">{field.label}</label>
+                {field.multiline ? (
+                  <textarea
+                    className="section-textarea"
+                    rows={4}
+                    placeholder={field.placeholder}
+                    value={conceptData[field.id] || ""}
+                    onChange={(e) => updateConceptField(field.id, e.target.value)}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    className="section-input"
+                    placeholder={field.placeholder}
+                    value={conceptData[field.id] || ""}
+                    onChange={(e) => updateConceptField(field.id, e.target.value)}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -150,6 +341,12 @@ function App() {
       </div>
 
       <div className="strategies">
+        {sectionMeta.map((s) => renderSectionCard(s))}
+
+        <div className="section-divider">
+          <span className="section-divider-label">4. EcoDesign Strategies (Brezet, 1997)</span>
+        </div>
+
         {checklistData.map((strategy) => {
           const prog = getStrategyProgress(strategy);
           const isExpanded = expandedStrategies.has(strategy.id);
@@ -167,7 +364,7 @@ function App() {
                     className="strategy-number"
                     style={{ backgroundColor: strategy.color }}
                   >
-                    {strategy.id}
+                    4.{strategy.id}
                   </span>
                   <div className="strategy-info">
                     <h2>{strategy.strategy}</h2>
@@ -241,6 +438,12 @@ function App() {
             </div>
           );
         })}
+
+        <div className="section-divider">
+          <span className="section-divider-label">5. New Concept</span>
+        </div>
+
+        {renderNewConceptCard()}
       </div>
 
       <footer className="footer">

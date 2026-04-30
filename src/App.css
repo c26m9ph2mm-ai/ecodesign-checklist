@@ -391,6 +391,86 @@ body {
   background: white;
 }
 
+/* Section fields (Design Brief, Need Analysis, etc.) */
+.section-fields {
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.section-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.section-input,
+.section-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+  background: white;
+}
+
+.section-input:focus,
+.section-textarea:focus {
+  border-color: var(--green-primary);
+}
+
+.strategy-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.strategy-number {
+  min-width: 44px;
+  width: auto;
+  padding: 0 8px;
+  height: 32px;
+  border-radius: 16px;
+  font-size: 13px;
+}
+
+.section-divider {
+  margin: 8px 0 4px;
+  padding: 14px 20px 6px;
+  border-bottom: 2px solid var(--border);
+}
+
+.section-divider-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--green-primary);
+}
+
+.concept-card {
+  border: 2px solid var(--green-primary);
+  background: #fafff5;
+}
+
 /* Footer */
 .footer {
   margin-top: 40px;

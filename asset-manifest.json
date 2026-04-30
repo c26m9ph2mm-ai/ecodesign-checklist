@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/ecodesign-checklist/static/css/main.5e055f3c.css",
-    "main.js": "/ecodesign-checklist/static/js/main.96154ee8.js",
+    "main.css": "/ecodesign-checklist/static/css/main.a7dd48ae.css",
+    "main.js": "/ecodesign-checklist/static/js/main.aabff9ec.js",
     "static/js/453.48d42db4.chunk.js": "/ecodesign-checklist/static/js/453.48d42db4.chunk.js",
     "index.html": "/ecodesign-checklist/index.html",
-    "main.5e055f3c.css.map": "/ecodesign-checklist/static/css/main.5e055f3c.css.map",
-    "main.96154ee8.js.map": "/ecodesign-checklist/static/js/main.96154ee8.js.map",
+    "main.a7dd48ae.css.map": "/ecodesign-checklist/static/css/main.a7dd48ae.css.map",
+    "main.aabff9ec.js.map": "/ecodesign-checklist/static/js/main.aabff9ec.js.map",
     "453.48d42db4.chunk.js.map": "/ecodesign-checklist/static/js/453.48d42db4.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.5e055f3c.css",
-    "static/js/main.96154ee8.js"
+    "static/css/main.a7dd48ae.css",
+    "static/js/main.aabff9ec.js"
   ]
 }

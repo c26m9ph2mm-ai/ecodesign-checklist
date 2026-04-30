@@ -9,9 +9,9 @@ import {
 import "./App.css";
 
 const sectionMeta = [
-  { key: "designBrief", title: "1. Design Brief", subtitle: "Define the assignment: what is being designed, for whom, and under what constraints.", color: "#5D4037", fields: designBriefFields },
-  { key: "needAnalysis", title: "2. Need Analysis", subtitle: "Identify and prioritise the needs the product must satisfy.", color: "#00695C", fields: needAnalysisFields },
-  { key: "functionDefinition", title: "3. Function Definition", subtitle: "Translate needs into the functions the product must perform.", color: "#1565C0", fields: functionDefinitionFields },
+  { key: "designBrief", title: "1. Design Brief", subtitle: "Define the assignment: what is being designed, for whom, and under what constraints.", color: "#000000", fields: designBriefFields },
+  { key: "needAnalysis", title: "2. Need Analysis", subtitle: "Identify and prioritise the needs the product must satisfy.", color: "#000000", fields: needAnalysisFields },
+  { key: "functionDefinition", title: "3. Function Definition", subtitle: "Translate needs into the functions the product must perform.", color: "#000000", fields: functionDefinitionFields },
 ];
 
 function App() {
@@ -286,11 +286,22 @@ function App() {
     <div className="app">
       <header className="header">
         <div className="header-content">
-          <div className="header-icon">&#9851;</div>
-          <div>
+          <a
+            href="https://sustainability-and-social-innovation.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ssi-logo"
+            aria-label="SSi Lab"
+          >
+            <span className="ssi-mark">S</span>
+            <span className="ssi-rest">Si Lab</span>
+          </a>
+          <div className="header-divider" />
+          <div className="header-text">
+            <div className="lab-tagline">Sustainability &amp; Social Innovation Lab</div>
             <h1>EcoDesign Checklist</h1>
             <p className="subtitle">
-              Based on Brezet (1997) &mdash; Systematic eco-design strategies for sustainable product development
+              Based on Brezet (1997) &mdash; A team workflow for sustainable product development
             </p>
           </div>
         </div>
@@ -447,6 +458,7 @@ function App() {
       </div>
 
       <footer className="footer">
+        <span className="footer-brand">SSi Lab &mdash; Sustainability &amp; Social Innovation Lab</span>
         <p>
           EcoDesign Checklist based on Brezet, H. (1997).{" "}
           <em>
@@ -454,6 +466,15 @@ function App() {
             Consumption.
           </em>{" "}
           UNEP, Paris.
+        </p>
+        <p style={{ marginTop: 8 }}>
+          <a
+            href="https://sustainability-and-social-innovation.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            sustainability-and-social-innovation.com
+          </a>
         </p>
       </footer>
     </div>
